@@ -15,6 +15,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT || 3000;
+  app.getHttpServer().setTimeout(15 * 60 * 1000);
 
   await app.listen(port);
 }
