@@ -29,7 +29,7 @@ export class ChatGPTService {
     });
   }
 
-  @Timeout(30 * 1000) // 30 seconds
+  @Timeout(300 * 1000) // 300 seconds
   async talkToChatGPT(message: string) {
     console.log('start to talk---');
     return this.openAIClient
