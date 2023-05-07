@@ -7,6 +7,7 @@ import { ThirdPartyModule } from './third-party/third-party.module';
 import { ChatGPTModule } from './chat-gpt/chat-gpt.module';
 import { NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { LoggingMiddleware } from './middleware/logging.middleware';
+import { LineBotMiddleware } from './middleware/line-bot.middleware';
 
 @Module({
   imports: [LineBotModule, Config, ThirdPartyModule, ChatGPTModule],
@@ -16,5 +17,6 @@ import { LoggingMiddleware } from './middleware/logging.middleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggingMiddleware).forRoutes('*');
+    consumer.apply(LineBotMiddleware).forRoutes('line-bot');
   }
 }

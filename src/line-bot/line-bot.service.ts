@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateLineBotDto } from './dto/create-line-bot.dto';
-import { UpdateLineBotDto } from './dto/update-line-bot.dto';
+import { CreateLineBotDTO } from './dto/create.dto';
+import { UpdateLineBotDto } from './dto/update.dto';
+import { WebhookRequestBody } from '@line/bot-sdk';
 
 @Injectable()
 export class LineBotService {
-  create(createLineBotDto: CreateLineBotDto) {
+  create(createLineBotDto: CreateLineBotDTO) {
     return 'This action adds a new lineBot';
   }
 
@@ -22,5 +23,9 @@ export class LineBotService {
 
   remove(id: number) {
     return `This action removes a #${id} lineBot`;
+  }
+
+  reply(webhookRequestBody: WebhookRequestBody) {
+    return `This action replies a message: ${webhookRequestBody}`;
   }
 }
