@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Timeout } from '@nestjs/schedule';
 import { Configuration, OpenAIApi } from 'openai';
 
 @Injectable()
@@ -28,7 +29,9 @@ export class ChatGPTService {
     });
   }
 
+  @Timeout(30 * 1000) // 30 seconds
   async talkToChatGPT(message: string) {
+    console.log('start to talk---');
     return this.openAIClient
       .createChatCompletion({
         model: this.model,
