@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateLineBotDTO } from './dto/create.dto';
 import { UpdateLineBotDto } from './dto/update.dto';
-import { WebhookRequestBody } from '@line/bot-sdk';
+import { WebhookEvent } from '@line/bot-sdk';
 import { ChatGPTService } from 'src/chat-gpt/chat-gpt.service';
 
 @Injectable()
@@ -27,12 +27,32 @@ export class LineBotService {
     return `This action removes a #${id} lineBot`;
   }
 
-  reply(webhookRequestBody: WebhookRequestBody) {
+  async reply(webhookRequestBody: {
+    destination: string;
+    events: Array<WebhookEvent>;
+  }) {
+    let talkResponse;
     console.log('webhookRequestBody :>> ', JSON.stringify(webhookRequestBody));
-    // const messageEvents = webhookRequestBody.events.filter((element) => {
-    //   return element.type === 'message';
-    // });
-    // this.chatGPTService.talkToChatGPT(messageEvents[0].message.text);
-    return `This action replies a message: ${webhookRequestBody}`;
+    const { type } = webhookRequestBody.events[0];
+    switch (type) {
+      case 'message':
+        const { message } = webhookRequestBody.events[0];
+        switch (message.type) {
+          case 'text':
+            talkResponse = await this.chatGPTService.talkToChatGPT(
+              message.text,
+            );
+            break;
+
+          default:
+            break;
+        }
+        break;
+      default:
+        console.log(`msgType: ${type}`);
+        break;
+    }
+    console.log('talkResponse :>> ', talkResponse);
+    return talkResponse;
   }
 }
