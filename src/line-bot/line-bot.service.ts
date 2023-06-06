@@ -1,12 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CreateLineBotDTO } from './dto/create.dto';
 import { UpdateLineBotDto } from './dto/update.dto';
-import { WebhookEvent } from '@line/bot-sdk';
+import { Client, WebhookEvent } from '@line/bot-sdk';
 import { ChatGPTService } from 'src/chat-gpt/chat-gpt.service';
 
 @Injectable()
 export class LineBotService {
-  constructor(private readonly chatGPTService: ChatGPTService) {}
+  lineBotConfig: {
+    channelAccessToken: string;
+    channelSecret: string;
+  };
+  client: Client;
+  constructor(
+    private readonly chatGPTService: ChatGPTService,
+    private readonly configService: ConfigService,
+  ) {
+    this.lineBotConfig = {
+      channelAccessToken: this.configService.get<string>(
+        'LINE_CHANNEL_ACCESS_TOKEN',
+      ),
+      channelSecret: this.configService.get<string>('LINE_CHANNEL_SECRET'),
+    };
+    this.client = new Client(this.lineBotConfig);
+  }
   create(createLineBotDto: CreateLineBotDTO) {
     return 'This action adds a new lineBot';
   }
@@ -34,14 +51,19 @@ export class LineBotService {
     let talkResponse;
     console.log('webhookRequestBody :>> ', JSON.stringify(webhookRequestBody));
     const { type } = webhookRequestBody.events[0];
+
     switch (type) {
       case 'message':
-        const { message } = webhookRequestBody.events[0];
+        const { message, replyToken } = webhookRequestBody.events[0];
         switch (message.type) {
           case 'text':
             talkResponse = await this.chatGPTService.talkToChatGPT(
               message.text,
             );
+            return this.client.replyMessage(replyToken, {
+              type: 'text',
+              text: talkResponse,
+            });
             break;
 
           default:
@@ -53,6 +75,5 @@ export class LineBotService {
         break;
     }
     console.log('talkResponse :>> ', talkResponse);
-    return talkResponse;
   }
 }
